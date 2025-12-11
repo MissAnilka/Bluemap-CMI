@@ -26,19 +26,31 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
         cache: 'maven'
 
-    - name: Install CMI dependency manually
+    - name: Create stub dependencies
       run: |
+        # Create stub JAR files for unavailable dependencies
+        mkdir -p stubs
+        
+        # Create empty JAR for CMI
+        echo "PK" > stubs/CMI-9.8.5.0.jar
         mvn install:install-file \
-          -Dfile=<(echo "") \
+          -Dfile=stubs/CMI-9.8.5.0.jar \
           -DgroupId=com.Zrips \
           -DartifactId=CMI \
           -Dversion=9.8.5.0 \
-          -Dpackaging=jar \
-          -DgeneratePom=true || echo "CMI stub created"
-      continue-on-error: true
+          -Dpackaging=jar
+        
+        # Create empty JAR for BlueMapAPI
+        echo "PK" > stubs/BlueMapAPI-2.3.0.jar
+        mvn install:install-file \
+          -Dfile=stubs/BlueMapAPI-2.3.0.jar \
+          -DgroupId=de.bluecolored.bluemap \
+          -DartifactId=BlueMapAPI \
+          -Dversion=2.3.0 \
+          -Dpackaging=jar
 
     - name: Build with Maven
-      run: mvn -B package --file pom.xml -Dmaven.test.skip=true
+      run: mvn -B package --file pom.xml -DskipTests
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
