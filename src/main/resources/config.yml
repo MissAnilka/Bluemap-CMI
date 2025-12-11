@@ -1,0 +1,39 @@
+# Bluemap CMI Integration Configuration
+
+# Enable/Disable integrations
+integrations:
+  spawn: true
+  warps: true
+  first-spawn: true
+
+# Spawn marker settings
+spawn-marker:
+  enabled: true
+  label: "Spawn"
+  icon: "spawn.png"
+  min-zoom: 0
+  sort-by: 0
+  description: "Server spawn location"
+
+# First Spawn marker settings
+first-spawn-marker:
+  enabled: true
+  label: "First Spawn"
+  icon: "spawnpoint.png"
+  min-zoom: 0
+  sort-by: 1
+  description: "First spawn location for new players"
+
+# Warps marker settings
+warps-marker:
+  enabled: true
+  icon: "portal.png"
+  min-zoom: 0
+  sort-by: 2
+  max-warps: 0  # 0 = unlimited, any other number limits visible warps
+
+# General settings
+settings:
+  update-interval: 300  # Seconds between updates (0 to disable auto-updates)
+  debug: false
+  log-marker-additions: true
