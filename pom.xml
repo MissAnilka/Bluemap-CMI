@@ -41,6 +41,13 @@
         <repository>
             <id>cmi</id>
             <url>https://repo.zrips.net/releases</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -59,6 +66,7 @@
             <artifactId>BlueMapAPI</artifactId>
             <version>2.3.0</version>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- CMI -->
@@ -67,6 +75,7 @@
             <artifactId>CMI</artifactId>
             <version>9.8.5.0</version>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- Lombok for reducing boilerplate -->
