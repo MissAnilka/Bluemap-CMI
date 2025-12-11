@@ -28,6 +28,9 @@ jobs:
 
     - name: Create stub dependencies (API only)
       run: |
+        set -euo pipefail
+        export MAVEN_REPO=$GITHUB_WORKSPACE/.m2
+        
         # Prepare directories
         mkdir -p lib stub-classes \
           stub-src/com/Zrips/CMI/Modules/Warp \
@@ -113,22 +116,25 @@ jobs:
         EOF
 
         # Download Paper API for Bukkit types
-        mvn dependency:get -Dartifact=io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT
+        mvn -Dmaven.repo.local="$MAVEN_REPO" dependency:get \
+          -Dartifact=io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT \
+          -DrepoUrl=https://repo.papermc.io/repository/maven-public/ \
+          -Dtransitive=false
 
         # Compile stubs
         javac -d stub-classes \
-          -cp ~/.m2/repository/io/papermc/paper/paper-api/1.20.4-R0.1-SNAPSHOT/paper-api-1.20.4-R0.1-SNAPSHOT.jar \
-          $(find stub-src -name "*.java") || true
+          -cp "$MAVEN_REPO/io/papermc/paper/paper-api/1.20.4-R0.1-SNAPSHOT/paper-api-1.20.4-R0.1-SNAPSHOT.jar" \
+          $(find stub-src -name "*.java")
 
         # Package into JARs
         cd stub-classes && jar cf ../lib/CMI-9.8.5.0.jar com && jar cf ../lib/BlueMapAPI-2.3.0.jar de && cd ..
 
         # Install stubs to local Maven repo (compile-only; real plugins provided at runtime)
-        mvn install:install-file -Dfile=lib/CMI-9.8.5.0.jar -DgroupId=com.Zrips -DartifactId=CMI -Dversion=9.8.5.0 -Dpackaging=jar
-        mvn install:install-file -Dfile=lib/BlueMapAPI-2.3.0.jar -DgroupId=de.bluecolored.bluemap -DartifactId=BlueMapAPI -Dversion=2.3.0 -Dpackaging=jar
+        mvn -Dmaven.repo.local="$MAVEN_REPO" install:install-file -Dfile=lib/CMI-9.8.5.0.jar -DgroupId=com.Zrips -DartifactId=CMI -Dversion=9.8.5.0 -Dpackaging=jar -DgeneratePom=true
+        mvn -Dmaven.repo.local="$MAVEN_REPO" install:install-file -Dfile=lib/BlueMapAPI-2.3.0.jar -DgroupId=de.bluecolored.bluemap -DartifactId=BlueMapAPI -Dversion=2.3.0 -Dpackaging=jar -DgeneratePom=true
 
     - name: Build with Maven
-      run: mvn -B package --file pom.xml -DskipTests -Dmaven.test.skip=true
+      run: mvn -B package --file pom.xml -DskipTests -Dmaven.test.skip=true -Dmaven.repo.local=$GITHUB_WORKSPACE/.m2
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
