@@ -100,7 +100,6 @@ public class CMIIntegration {
                             }
                         }
                     }
-                    plugin.getLogger().info("Retrieved " + warps.size() + " warps from CMI");
                 }
             }
         } catch (Exception e) {

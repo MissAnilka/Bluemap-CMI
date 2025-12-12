@@ -113,9 +113,6 @@ public class BluemapIntegration {
                 plugin.getConfig().getString("spawn-marker.description", "Server spawn location"),
                 "spawn"
             );
-            if (plugin.getConfig().getBoolean("settings.log-marker-additions", true)) {
-                plugin.getLogger().info("Spawn marker added at " + formatLocation(spawnLocation));
-            }
         }
     }
 
@@ -143,9 +140,6 @@ public class BluemapIntegration {
                 plugin.getConfig().getString("first-spawn-marker.description", "First spawn location for new players"),
                 "firstspawn"
             );
-            if (plugin.getConfig().getBoolean("settings.log-marker-additions", true)) {
-                plugin.getLogger().info("First Spawn marker added at " + formatLocation(firstSpawnLocation));
-            }
         }
     }
 
@@ -185,10 +179,6 @@ public class BluemapIntegration {
                 );
                 count++;
             }
-        }
-
-        if (plugin.getConfig().getBoolean("settings.log-marker-additions", true)) {
-            plugin.getLogger().info(count + " warp markers added" + (skipped > 0 ? " (" + skipped + " skipped from blacklisted worlds)" : ""));
         }
     }
 

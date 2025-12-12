@@ -39,4 +39,4 @@ world-blacklist:
 settings:
   update-interval: 300  # Seconds between updates (0 to disable auto-updates)
   debug: false
-  log-marker-additions: true
+  log-marker-additions: false  # Set to true to see marker additions in console
