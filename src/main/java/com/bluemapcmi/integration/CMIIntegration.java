@@ -64,26 +64,35 @@ public class CMIIntegration {
         
         try {
             if (cmiPlugin != null && cmiPlugin.getWarpManager() != null) {
-                // Get all warp names from CMI
-                List<String> warpNames = cmiPlugin.getWarpManager().getWarpsList();
+                // CMI WarpManager doesn't expose direct methods, so we use reflection
+                // to access the internal warps map
+                java.lang.reflect.Field warpsField = cmiPlugin.getWarpManager().getClass().getDeclaredField("warps");
+                warpsField.setAccessible(true);
+                Object warpsMap = warpsField.get(cmiPlugin.getWarpManager());
                 
-                if (warpNames != null && !warpNames.isEmpty()) {
-                    for (String warpName : warpNames) {
-                        try {
-                            // Get warp location by name
-                            Location loc = cmiPlugin.getWarpManager().getWarpLocation(warpName);
-                            if (loc != null) {
-                                warps.put(warpName, loc);
-                            }
-                        } catch (Exception e) {
-                            if (plugin.getConfig().getBoolean("settings.debug", false)) {
-                                plugin.getLogger().warning("Could not get location for warp '" + warpName + "': " + e.getMessage());
+                if (warpsMap instanceof Map) {
+                    Map<?, ?> cmiWarps = (Map<?, ?>) warpsMap;
+                    
+                    for (Map.Entry<?, ?> entry : cmiWarps.entrySet()) {
+                        if (entry.getKey() != null && entry.getValue() != null) {
+                            String warpName = entry.getKey().toString();
+                            Object warpObj = entry.getValue();
+                            
+                            try {
+                                // Try to get location using reflection
+                                java.lang.reflect.Method getLocMethod = warpObj.getClass().getMethod("getLoc");
+                                Location loc = (Location) getLocMethod.invoke(warpObj);
+                                if (loc != null) {
+                                    warps.put(warpName, loc);
+                                }
+                            } catch (Exception e) {
+                                if (plugin.getConfig().getBoolean("settings.debug", false)) {
+                                    plugin.getLogger().warning("Could not get location for warp '" + warpName + "': " + e.getMessage());
+                                }
                             }
                         }
                     }
                     plugin.getLogger().info("Retrieved " + warps.size() + " warps from CMI");
-                } else {
-                    plugin.getLogger().info("No warps found in CMI");
                 }
             }
         } catch (Exception e) {
