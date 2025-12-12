@@ -2,6 +2,7 @@ package com.bluemapcmi;
 
 import com.bluemapcmi.integration.BluemapIntegration;
 import com.bluemapcmi.integration.CMIIntegration;
+import de.bluecolored.bluemap.api.BlueMapAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,25 +25,24 @@ public class BluemapCMIPlugin extends JavaPlugin {
         getLogger().info("╚════════════════════════════════════════╝");
 
         try {
-            // Initialize integrations
-            this.bluemapIntegration = new BluemapIntegration(this);
-            this.cmiIntegration = new CMIIntegration(this);
-
-            // Check if dependencies are available
-            if (Bukkit.getPluginManager().getPlugin("BlueMap") == null) {
-                getLogger().severe("BlueMap plugin not found! Disabling...");
-                Bukkit.getPluginManager().disablePlugin(this);
-                return;
-            }
-
+            // Check if CMI is available
             if (Bukkit.getPluginManager().getPlugin("CMI") == null) {
                 getLogger().severe("CMI plugin not found! Disabling...");
                 Bukkit.getPluginManager().disablePlugin(this);
                 return;
             }
 
-            // Initialize markers from CMI data
-            bluemapIntegration.initializeMarkers();
+            // Initialize CMI integration
+            this.cmiIntegration = new CMIIntegration(this);
+
+            // Check if BlueMap is available
+            if (Bukkit.getPluginManager().getPlugin("BlueMap") == null) {
+                getLogger().warning("BlueMap plugin not found! Markers will not be displayed.");
+                return;
+            }
+
+            // Initialize BlueMap integration asynchronously
+            initializeBlueMapIntegration();
 
             // Start update task if enabled
             int updateInterval = getConfig().getInt("settings.update-interval", 300);
@@ -59,6 +59,26 @@ public class BluemapCMIPlugin extends JavaPlugin {
             e.printStackTrace();
             Bukkit.getPluginManager().disablePlugin(this);
         }
+    }
+
+    private void initializeBlueMapIntegration() {
+        // Register BlueMapAPI consumer to initialize when API is available
+        BlueMapAPI.onEnable(api -> {
+            try {
+                getLogger().info("BlueMap API is now available, initializing integration...");
+                this.bluemapIntegration = new BluemapIntegration(this);
+                bluemapIntegration.initializeMarkers();
+                getLogger().info("BlueMap integration initialized successfully!");
+            } catch (Exception e) {
+                getLogger().severe("Failed to initialize BlueMap integration: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+        // Also register for disable event
+        BlueMapAPI.onDisable(api -> {
+            getLogger().info("BlueMap API disabled");
+        });
     }
 
     @Override

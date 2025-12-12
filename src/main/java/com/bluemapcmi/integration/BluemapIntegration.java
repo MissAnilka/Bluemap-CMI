@@ -21,7 +21,7 @@ public class BluemapIntegration {
     public BluemapIntegration(BluemapCMIPlugin plugin) throws Exception {
         this.plugin = plugin;
         
-        // Get API instance
+        // Get API instance - should be available when called from API consumer
         if (!BlueMapAPI.getInstance().isPresent()) {
             throw new Exception("BlueMap API is not available");
         }

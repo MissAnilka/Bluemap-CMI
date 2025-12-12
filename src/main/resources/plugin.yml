@@ -5,5 +5,6 @@ description: Integration between Bluemap and CMI plugin
 authors:
   - AnilkaAI
 depend:
-  - BlueMap
   - CMI
+softdepend:
+  - BlueMap
