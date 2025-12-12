@@ -15,11 +15,11 @@ public class UpdateTask extends Thread {
 
     @Override
     public void run() {
-        int updateInterval = plugin.getConfig().getInt("settings.update-interval", 300) * 20L; // Convert to ticks
+        long updateInterval = plugin.getConfig().getInt("settings.update-interval", 300) * 1000L; // Convert to milliseconds
 
         while (running) {
             try {
-                Thread.sleep(updateInterval * 50); // Convert ticks to milliseconds
+                Thread.sleep(updateInterval);
                 
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     try {

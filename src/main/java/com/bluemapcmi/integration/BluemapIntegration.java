@@ -14,28 +14,19 @@ import java.util.*;
 public class BluemapIntegration {
 
     private final BluemapCMIPlugin plugin;
-    private final BlueMapAPI bluemapAPI;
+    private BlueMapAPI bluemapAPI;
     private final Map<String, POIMarker> activeMarkers = new HashMap<>();
     private MarkerSet markerSet;
 
     public BluemapIntegration(BluemapCMIPlugin plugin) throws Exception {
         this.plugin = plugin;
         
-        // Initialize BlueMap API
-        BlueMapAPI.onEnable((api) -> {
-            this.bluemapAPI = api;
-            plugin.getLogger().info("BlueMap API initialized");
-        });
-
         // Get API instance
-        if (!BlueMapAPI.isLoaded()) {
-            Thread.sleep(1000); // Wait for API to load
-        }
-        this.bluemapAPI = BlueMapAPI.getInstance().orElse(null);
-
-        if (bluemapAPI == null) {
+        if (!BlueMapAPI.getInstance().isPresent()) {
             throw new Exception("BlueMap API is not available");
         }
+        
+        this.bluemapAPI = BlueMapAPI.getInstance().get();
 
         plugin.getLogger().info("BluemapIntegration initialized successfully");
     }
@@ -51,13 +42,13 @@ public class BluemapIntegration {
             }
 
             for (BlueMapMap map : maps) {
-                markerSet = map.getMarkerSets()
-                    .stream()
-                    .filter(ms -> ms.getLabel().equals("CMI Locations"))
-                    .findFirst()
-                    .orElseGet(() -> map.createMarkerSet("cmi-locations"));
-
-                markerSet.setLabel("CMI Locations");
+                // Create or get marker set
+                String markerSetId = "cmi-locations";
+                markerSet = MarkerSet.builder()
+                    .label("CMI Locations")
+                    .build();
+                
+                map.getMarkerSets().put(markerSetId, markerSet);
                 
                 addSpawnMarkers();
                 addWarpMarkers();
@@ -149,12 +140,11 @@ public class BluemapIntegration {
         try {
             POIMarker marker = POIMarker.builder()
                 .label(label)
-                .description(description)
                 .position(location.getX(), location.getY(), location.getZ())
                 .build();
 
             if (markerSet != null) {
-                markerSet.put(markerId, marker);
+                markerSet.getMarkers().put(markerId, marker);
                 activeMarkers.put(markerId, marker);
             }
         } catch (Exception e) {
@@ -165,7 +155,9 @@ public class BluemapIntegration {
     public void updateMarkers() {
         try {
             // Clear old markers
-            markerSet.getMarkers().forEach((key, marker) -> markerSet.remove(key));
+            if (markerSet != null) {
+                markerSet.getMarkers().clear();
+            }
             activeMarkers.clear();
 
             // Re-add all markers
@@ -179,10 +171,10 @@ public class BluemapIntegration {
 
     public void cleanup() {
         try {
-            if (markerSet != null && !activeMarkers.isEmpty()) {
-                activeMarkers.forEach((key, marker) -> markerSet.remove(key));
-                activeMarkers.clear();
+            if (markerSet != null) {
+                markerSet.getMarkers().clear();
             }
+            activeMarkers.clear();
         } catch (Exception e) {
             plugin.getLogger().warning("Error cleaning up markers: " + e.getMessage());
         }
