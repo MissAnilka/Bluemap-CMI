@@ -1,5 +1,5 @@
 name: BluemapCMI
-version: 1.0.0
+version: 1.0.1
 main: com.bluemapcmi.BluemapCMIPlugin
 description: Integration between Bluemap and CMI plugin
 authors:
