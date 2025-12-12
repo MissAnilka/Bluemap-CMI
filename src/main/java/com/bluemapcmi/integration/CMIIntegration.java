@@ -63,15 +63,22 @@ public class CMIIntegration {
         Map<String, Location> warps = new HashMap<>();
         
         try {
-            if (cmiPlugin != null) {
-                // Get all warps from CMI's Warp Manager
-                HashMap<String, com.Zrips.CMI.Modules.Warps.CuboidArea> cmiWarps = cmiPlugin.getWarpManager().getWarps();
+            if (cmiPlugin != null && cmiPlugin.getWarpManager() != null) {
+                // Get all warp names from CMI
+                List<String> warpNames = cmiPlugin.getWarpManager().getWarpsList();
                 
-                if (cmiWarps != null && !cmiWarps.isEmpty()) {
-                    for (Map.Entry<String, com.Zrips.CMI.Modules.Warps.CuboidArea> entry : cmiWarps.entrySet()) {
-                        com.Zrips.CMI.Modules.Warps.CuboidArea warpArea = entry.getValue();
-                        if (warpArea != null && warpArea.getCenter() != null) {
-                            warps.put(entry.getKey(), warpArea.getCenter());
+                if (warpNames != null && !warpNames.isEmpty()) {
+                    for (String warpName : warpNames) {
+                        try {
+                            // Get warp location by name
+                            Location loc = cmiPlugin.getWarpManager().getWarpLocation(warpName);
+                            if (loc != null) {
+                                warps.put(warpName, loc);
+                            }
+                        } catch (Exception e) {
+                            if (plugin.getConfig().getBoolean("settings.debug", false)) {
+                                plugin.getLogger().warning("Could not get location for warp '" + warpName + "': " + e.getMessage());
+                            }
                         }
                     }
                     plugin.getLogger().info("Retrieved " + warps.size() + " warps from CMI");
@@ -81,7 +88,9 @@ public class CMIIntegration {
             }
         } catch (Exception e) {
             plugin.getLogger().warning("Error getting warps: " + e.getMessage());
-            e.printStackTrace();
+            if (plugin.getConfig().getBoolean("settings.debug", false)) {
+                e.printStackTrace();
+            }
         }
         
         return warps;
