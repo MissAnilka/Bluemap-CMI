@@ -39,15 +39,8 @@
         </repository>
         <!-- CMI Repository -->
         <repository>
-            <id>cmi</id>
-            <url>https://repo.zrips.net/releases</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -62,18 +55,18 @@
 
         <!-- BlueMap API -->
         <dependency>
-            <groupId>de.bluecolored.bluemap</groupId>
-            <artifactId>BlueMapAPI</artifactId>
-            <version>2.3.0</version>
+            <groupId>de.bluecolored</groupId>
+            <artifactId>bluemap-api</artifactId>
+            <version>2.7.7</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
 
-        <!-- CMI -->
+        <!-- CMI API -->
         <dependency>
-            <groupId>com.Zrips</groupId>
-            <artifactId>CMI</artifactId>
-            <version>9.8.5.0</version>
+            <groupId>com.github.Zrips</groupId>
+            <artifactId>CMI-API</artifactId>
+            <version>9.7.14.3</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
