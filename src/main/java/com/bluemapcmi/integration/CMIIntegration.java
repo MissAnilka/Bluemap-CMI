@@ -32,7 +32,15 @@ public class CMIIntegration {
             // Get default world spawn (CMI manages spawn through vanilla mechanics)
             World defaultWorld = Bukkit.getWorlds().isEmpty() ? null : Bukkit.getWorlds().get(0);
             if (defaultWorld != null) {
-                return defaultWorld.getSpawnLocation();
+                Location spawn = defaultWorld.getSpawnLocation();
+                // Get the safe spawn location above ground by finding highest block
+                if (spawn != null) {
+                    Location safeSpawn = spawn.clone();
+                    // Get the highest solid block at spawn coordinates
+                    safeSpawn.setY(defaultWorld.getHighestBlockYAt(spawn.getBlockX(), spawn.getBlockZ()) + 1);
+                    return safeSpawn;
+                }
+                return spawn;
             }
             
             return null;

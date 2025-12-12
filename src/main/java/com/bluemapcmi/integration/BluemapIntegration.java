@@ -16,7 +16,9 @@ public class BluemapIntegration {
     private final BluemapCMIPlugin plugin;
     private BlueMapAPI bluemapAPI;
     private final Map<String, POIMarker> activeMarkers = new HashMap<>();
-    private MarkerSet markerSet;
+    private MarkerSet warpsMarkerSet;
+    private MarkerSet spawnMarkerSet;
+    private MarkerSet firstSpawnMarkerSet;
 
     public BluemapIntegration(BluemapCMIPlugin plugin) throws Exception {
         this.plugin = plugin;
@@ -41,20 +43,44 @@ public class BluemapIntegration {
                 return;
             }
 
-            // Create marker set once
-            String markerSetId = "cmi-locations";
-            markerSet = MarkerSet.builder()
-                .label("CMI Locations")
+            // Remove old marker sets from all maps to prevent duplicates
+            for (BlueMapMap map : maps) {
+                map.getMarkerSets().remove("cmi-locations");  // Old marker set ID
+                map.getMarkerSets().remove("cmi-spawns");     // Old marker set ID
+                map.getMarkerSets().remove("cmi-warps");      // Clear current to recreate
+                map.getMarkerSets().remove("cmi-spawn");
+                map.getMarkerSets().remove("cmi-firstspawn");
+            }
+
+            // Create separate marker sets for warps, spawn, and first spawn
+            warpsMarkerSet = MarkerSet.builder()
+                .label("CMI-Warps")
+                .toggleable(true)
+                .defaultHidden(false)
                 .build();
             
-            // Add markers to the set
+            spawnMarkerSet = MarkerSet.builder()
+                .label("CMI-Spawn")
+                .toggleable(true)
+                .defaultHidden(false)
+                .build();
+            
+            firstSpawnMarkerSet = MarkerSet.builder()
+                .label("CMI-FirstSpawn")
+                .toggleable(true)
+                .defaultHidden(false)
+                .build();
+            
+            // Add markers to their respective sets
             addSpawnMarkers();
             addWarpMarkers();
             addFirstSpawnMarker();
             
-            // Add marker set to all maps
+            // Add marker sets to all maps
             for (BlueMapMap map : maps) {
-                map.getMarkerSets().put(markerSetId, markerSet);
+                map.getMarkerSets().put("cmi-warps", warpsMarkerSet);
+                map.getMarkerSets().put("cmi-spawn", spawnMarkerSet);
+                map.getMarkerSets().put("cmi-firstspawn", firstSpawnMarkerSet);
                 plugin.getLogger().info("Markers initialized for map: " + map.getName());
             }
         } catch (Exception e) {
@@ -84,7 +110,8 @@ public class BluemapIntegration {
                 "spawn",
                 spawnLocation,
                 plugin.getConfig().getString("spawn-marker.label", "Spawn"),
-                plugin.getConfig().getString("spawn-marker.description", "Server spawn location")
+                plugin.getConfig().getString("spawn-marker.description", "Server spawn location"),
+                "spawn"
             );
             if (plugin.getConfig().getBoolean("settings.log-marker-additions", true)) {
                 plugin.getLogger().info("Spawn marker added at " + formatLocation(spawnLocation));
@@ -113,7 +140,8 @@ public class BluemapIntegration {
                 "first-spawn",
                 firstSpawnLocation,
                 plugin.getConfig().getString("first-spawn-marker.label", "First Spawn"),
-                plugin.getConfig().getString("first-spawn-marker.description", "First spawn location for new players")
+                plugin.getConfig().getString("first-spawn-marker.description", "First spawn location for new players"),
+                "firstspawn"
             );
             if (plugin.getConfig().getBoolean("settings.log-marker-additions", true)) {
                 plugin.getLogger().info("First Spawn marker added at " + formatLocation(firstSpawnLocation));
@@ -152,7 +180,8 @@ public class BluemapIntegration {
                     "warp-" + warp.getKey(),
                     warpLocation,
                     "Warp: " + warp.getKey(),
-                    "Warp point: " + warp.getKey()
+                    "Warp point: " + warp.getKey(),
+                    "warp"
                 );
                 count++;
             }
@@ -163,15 +192,28 @@ public class BluemapIntegration {
         }
     }
 
-    private void addMarker(String markerId, Location location, String label, String description) {
+    private void addMarker(String markerId, Location location, String label, String description, String markerType) {
         try {
             POIMarker marker = POIMarker.builder()
                 .label(label)
                 .position(location.getX(), location.getY(), location.getZ())
                 .build();
 
-            if (markerSet != null) {
-                markerSet.getMarkers().put(markerId, marker);
+            MarkerSet targetSet = null;
+            switch (markerType) {
+                case "warp":
+                    targetSet = warpsMarkerSet;
+                    break;
+                case "spawn":
+                    targetSet = spawnMarkerSet;
+                    break;
+                case "firstspawn":
+                    targetSet = firstSpawnMarkerSet;
+                    break;
+            }
+            
+            if (targetSet != null) {
+                targetSet.getMarkers().put(markerId, marker);
                 activeMarkers.put(markerId, marker);
             }
         } catch (Exception e) {
@@ -182,8 +224,14 @@ public class BluemapIntegration {
     public void updateMarkers() {
         try {
             // Clear old markers
-            if (markerSet != null) {
-                markerSet.getMarkers().clear();
+            if (warpsMarkerSet != null) {
+                warpsMarkerSet.getMarkers().clear();
+            }
+            if (spawnMarkerSet != null) {
+                spawnMarkerSet.getMarkers().clear();
+            }
+            if (firstSpawnMarkerSet != null) {
+                firstSpawnMarkerSet.getMarkers().clear();
             }
             activeMarkers.clear();
 
@@ -198,8 +246,14 @@ public class BluemapIntegration {
 
     public void cleanup() {
         try {
-            if (markerSet != null) {
-                markerSet.getMarkers().clear();
+            if (warpsMarkerSet != null) {
+                warpsMarkerSet.getMarkers().clear();
+            }
+            if (spawnMarkerSet != null) {
+                spawnMarkerSet.getMarkers().clear();
+            }
+            if (firstSpawnMarkerSet != null) {
+                firstSpawnMarkerSet.getMarkers().clear();
             }
             activeMarkers.clear();
         } catch (Exception e) {
