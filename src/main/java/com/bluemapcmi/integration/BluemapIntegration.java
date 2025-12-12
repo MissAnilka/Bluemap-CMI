@@ -33,7 +33,7 @@ public class BluemapIntegration {
 
     public void initializeMarkers() {
         try {
-            // Create marker set
+            // Get all maps
             Collection<BlueMapMap> maps = bluemapAPI.getMaps();
             
             if (maps.isEmpty()) {
@@ -41,19 +41,20 @@ public class BluemapIntegration {
                 return;
             }
 
+            // Create marker set once
+            String markerSetId = "cmi-locations";
+            markerSet = MarkerSet.builder()
+                .label("CMI Locations")
+                .build();
+            
+            // Add markers to the set
+            addSpawnMarkers();
+            addWarpMarkers();
+            addFirstSpawnMarker();
+            
+            // Add marker set to all maps
             for (BlueMapMap map : maps) {
-                // Create or get marker set
-                String markerSetId = "cmi-locations";
-                markerSet = MarkerSet.builder()
-                    .label("CMI Locations")
-                    .build();
-                
                 map.getMarkerSets().put(markerSetId, markerSet);
-                
-                addSpawnMarkers();
-                addWarpMarkers();
-                addFirstSpawnMarker();
-
                 plugin.getLogger().info("Markers initialized for map: " + map.getName());
             }
         } catch (Exception e) {
@@ -63,7 +64,7 @@ public class BluemapIntegration {
     }
 
     private void addSpawnMarkers() {
-        if (!plugin.getConfig().getBoolean("integrations.spawn", true)) {
+        if (!plugin.getConfig().getBoolean("spawn-marker.enabled", true)) {
             return;
         }
 
@@ -71,6 +72,14 @@ public class BluemapIntegration {
         Location spawnLocation = cmiIntegration.getSpawn();
 
         if (spawnLocation != null && spawnLocation.getWorld() != null) {
+            // Check if world is blacklisted
+            if (isWorldBlacklisted(spawnLocation.getWorld().getName())) {
+                if (plugin.getConfig().getBoolean("settings.debug", false)) {
+                    plugin.getLogger().info("Skipping spawn marker - world " + spawnLocation.getWorld().getName() + " is blacklisted");
+                }
+                return;
+            }
+            
             addMarker(
                 "spawn",
                 spawnLocation,
@@ -84,7 +93,7 @@ public class BluemapIntegration {
     }
 
     private void addFirstSpawnMarker() {
-        if (!plugin.getConfig().getBoolean("integrations.first-spawn", true)) {
+        if (!plugin.getConfig().getBoolean("first-spawn-marker.enabled", true)) {
             return;
         }
 
@@ -92,6 +101,14 @@ public class BluemapIntegration {
         Location firstSpawnLocation = cmiIntegration.getFirstSpawn();
 
         if (firstSpawnLocation != null && firstSpawnLocation.getWorld() != null) {
+            // Check if world is blacklisted
+            if (isWorldBlacklisted(firstSpawnLocation.getWorld().getName())) {
+                if (plugin.getConfig().getBoolean("settings.debug", false)) {
+                    plugin.getLogger().info("Skipping first spawn marker - world " + firstSpawnLocation.getWorld().getName() + " is blacklisted");
+                }
+                return;
+            }
+            
             addMarker(
                 "first-spawn",
                 firstSpawnLocation,
@@ -105,7 +122,7 @@ public class BluemapIntegration {
     }
 
     private void addWarpMarkers() {
-        if (!plugin.getConfig().getBoolean("integrations.warps", true)) {
+        if (!plugin.getConfig().getBoolean("warps-marker.enabled", true)) {
             return;
         }
 
@@ -113,6 +130,7 @@ public class BluemapIntegration {
         Map<String, Location> warps = cmiIntegration.getWarps();
         int maxWarps = plugin.getConfig().getInt("warps-marker.max-warps", 0);
         int count = 0;
+        int skipped = 0;
 
         for (Map.Entry<String, Location> warp : warps.entrySet()) {
             if (maxWarps > 0 && count >= maxWarps) {
@@ -121,6 +139,15 @@ public class BluemapIntegration {
 
             Location warpLocation = warp.getValue();
             if (warpLocation != null && warpLocation.getWorld() != null) {
+                // Check if world is blacklisted
+                if (isWorldBlacklisted(warpLocation.getWorld().getName())) {
+                    skipped++;
+                    if (plugin.getConfig().getBoolean("settings.debug", false)) {
+                        plugin.getLogger().info("Skipping warp '" + warp.getKey() + "' - world " + warpLocation.getWorld().getName() + " is blacklisted");
+                    }
+                    continue;
+                }
+                
                 addMarker(
                     "warp-" + warp.getKey(),
                     warpLocation,
@@ -132,7 +159,7 @@ public class BluemapIntegration {
         }
 
         if (plugin.getConfig().getBoolean("settings.log-marker-additions", true)) {
-            plugin.getLogger().info(count + " warp markers added");
+            plugin.getLogger().info(count + " warp markers added" + (skipped > 0 ? " (" + skipped + " skipped from blacklisted worlds)" : ""));
         }
     }
 
@@ -182,12 +209,23 @@ public class BluemapIntegration {
 
     private String formatLocation(Location location) {
         if (location == null) return "null";
+        if (location.getWorld() == null) return "unknown-world";
         return String.format("%s [%.0f, %.0f, %.0f]", 
             location.getWorld().getName(),
             location.getX(),
             location.getY(),
             location.getZ()
         );
+    }
+
+    /**
+     * Check if a world is blacklisted in the config
+     */
+    private boolean isWorldBlacklisted(String worldName) {
+        if (worldName == null) return false;
+        
+        java.util.List<String> blacklist = plugin.getConfig().getStringList("world-blacklist");
+        return blacklist != null && blacklist.contains(worldName);
     }
 
 }

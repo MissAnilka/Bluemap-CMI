@@ -1,11 +1,5 @@
 # Bluemap CMI Integration Configuration
 
-# Enable/Disable integrations
-integrations:
-  spawn: true
-  warps: true
-  first-spawn: true
-
 # Spawn marker settings
 spawn-marker:
   enabled: true
@@ -31,6 +25,15 @@ warps-marker:
   min-zoom: 0
   sort-by: 2
   max-warps: 0  # 0 = unlimited, any other number limits visible warps
+
+# World blacklist - markers from these worlds will not be shown
+world-blacklist:
+  - "world_nether"
+  - "world_the_end"
+  # Add more worlds to exclude from markers
+  # Example:
+  # - "resource_world"
+  # - "minigame_world"
 
 # General settings
 settings:
