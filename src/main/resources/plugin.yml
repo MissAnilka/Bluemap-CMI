@@ -1,9 +1,9 @@
 name: BluemapCMI
-version: 1.5
+version: 1.0
 main: com.bluemapcmi.BluemapCMIPlugin
 description: Integration between Bluemap and CMI plugin
 authors:
-  - AnilkaAI
+  - MissAnilka
 depend:
   - CMI
 softdepend:

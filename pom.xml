@@ -6,19 +6,11 @@
 
     <groupId>com.fembuncollective</groupId>
     <artifactId>bluemap-cmi</artifactId>
-    <version>1.5</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>Bluemap CMI Integration</name>
     <description>Integration between Bluemap and CMI plugins</description>
-
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/MissAnilka/Bluemap-CMI</url>
-        </repository>
-    </distributionManagement>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
