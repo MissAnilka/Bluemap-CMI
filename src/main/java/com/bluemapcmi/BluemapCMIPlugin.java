@@ -65,7 +65,7 @@ public class BluemapCMIPlugin extends JavaPlugin {
     public void onDisable() {
         // Stop update task
         if (updateTask != null) {
-            updateTask.stop();
+            updateTask.shutdown();
         }
 
         // Cleanup

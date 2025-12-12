@@ -40,7 +40,7 @@ public class UpdateTask extends Thread {
         }
     }
 
-    public void stop() {
+    public void shutdown() {
         running = false;
         interrupt();
     }

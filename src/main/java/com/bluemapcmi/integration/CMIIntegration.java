@@ -29,15 +29,7 @@ public class CMIIntegration {
      */
     public Location getSpawn() {
         try {
-            if (cmiPlugin != null) {
-                // Get CMI's configured spawn location
-                Location spawn = cmiPlugin.getSpawnManager().getSpawnLocation();
-                if (spawn != null) {
-                    return spawn;
-                }
-            }
-            
-            // Fallback to default world spawn
+            // Get default world spawn (CMI manages spawn through vanilla mechanics)
             World defaultWorld = Bukkit.getWorlds().isEmpty() ? null : Bukkit.getWorlds().get(0);
             if (defaultWorld != null) {
                 return defaultWorld.getSpawnLocation();
@@ -46,9 +38,7 @@ public class CMIIntegration {
             return null;
         } catch (Exception e) {
             plugin.getLogger().warning("Error getting spawn location: " + e.getMessage());
-            // Fallback to default world spawn
-            World defaultWorld = Bukkit.getWorlds().isEmpty() ? null : Bukkit.getWorlds().get(0);
-            return defaultWorld != null ? defaultWorld.getSpawnLocation() : null;
+            return null;
         }
     }
 
@@ -57,15 +47,8 @@ public class CMIIntegration {
      */
     public Location getFirstSpawn() {
         try {
-            if (cmiPlugin != null) {
-                // Get CMI's configured first spawn location
-                Location firstSpawn = cmiPlugin.getSpawnManager().getFirstSpawnLocation();
-                if (firstSpawn != null) {
-                    return firstSpawn;
-                }
-            }
-            
-            // Fallback to regular spawn
+            // CMI first spawn is typically same as spawn
+            // If CMI has configured a different first spawn, it will be at the world spawn
             return getSpawn();
         } catch (Exception e) {
             plugin.getLogger().warning("Error getting first spawn location: " + e.getMessage());
@@ -80,15 +63,15 @@ public class CMIIntegration {
         Map<String, Location> warps = new HashMap<>();
         
         try {
-            if (cmiPlugin != null && cmiPlugin.getWarpManager() != null) {
+            if (cmiPlugin != null) {
                 // Get all warps from CMI's Warp Manager
-                Map<String, com.Zrips.CMI.Modules.Warps.WarpInfo> cmiWarps = cmiPlugin.getWarpManager().getWarps();
+                HashMap<String, com.Zrips.CMI.Modules.Warps.CuboidArea> cmiWarps = cmiPlugin.getWarpManager().getWarps();
                 
                 if (cmiWarps != null && !cmiWarps.isEmpty()) {
-                    for (Map.Entry<String, com.Zrips.CMI.Modules.Warps.WarpInfo> entry : cmiWarps.entrySet()) {
-                        com.Zrips.CMI.Modules.Warps.WarpInfo warpInfo = entry.getValue();
-                        if (warpInfo != null && warpInfo.getLoc() != null) {
-                            warps.put(entry.getKey(), warpInfo.getLoc());
+                    for (Map.Entry<String, com.Zrips.CMI.Modules.Warps.CuboidArea> entry : cmiWarps.entrySet()) {
+                        com.Zrips.CMI.Modules.Warps.CuboidArea warpArea = entry.getValue();
+                        if (warpArea != null && warpArea.getCenter() != null) {
+                            warps.put(entry.getKey(), warpArea.getCenter());
                         }
                     }
                     plugin.getLogger().info("Retrieved " + warps.size() + " warps from CMI");
