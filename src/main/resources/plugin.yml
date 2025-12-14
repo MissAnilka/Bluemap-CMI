@@ -16,6 +16,6 @@ commands:
     aliases: [bcmi, bmc]
 
 permissions:
-  bluemap.admin:
+  bluemapcmi.admin:
     description: Access to all BluemapCMI commands
     default: op

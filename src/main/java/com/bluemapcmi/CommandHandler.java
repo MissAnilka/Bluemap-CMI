@@ -33,7 +33,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("bluemap.admin")) {
+        if (!sender.hasPermission("bluemapcmi.admin")) {
             sender.sendMessage(colorize(messages.getString("no-permission", "&cYou don't have permission to use this command!")));
             return true;
         }
@@ -147,7 +147,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (!sender.hasPermission("bluemap.admin")) {
+        if (!sender.hasPermission("bluemapcmi.admin")) {
             return new ArrayList<>();
         }
 
