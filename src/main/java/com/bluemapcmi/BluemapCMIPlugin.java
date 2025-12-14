@@ -19,6 +19,14 @@ public class BluemapCMIPlugin extends JavaPlugin {
         // Save default config
         saveDefaultConfig();
 
+        // Register command handler
+        CommandHandler commandHandler = new CommandHandler(this);
+        getCommand("bluemapcmi").setExecutor(commandHandler);
+        getCommand("bluemapcmi").setTabCompleter(commandHandler);
+        
+        // Register custom aliases from config
+        registerCustomAliases(commandHandler);
+
         getLogger().info("╔════════════════════════════════════════╗");
         getLogger().info("║     Bluemap CMI Integration Enabled    ║");
         getLogger().info("║           v" + getDescription().getVersion() + "                      ║");
@@ -49,10 +57,14 @@ public class BluemapCMIPlugin extends JavaPlugin {
             if (updateInterval > 0) {
                 updateTask = new UpdateTask(this);
                 updateTask.start();
-                getLogger().info("Marker update task started (interval: " + updateInterval + " seconds)");
+                if (getConfig().getBoolean("settings.debug", false)) {
+                    getLogger().info("Marker update task started (interval: " + updateInterval + " seconds)");
+                }
             }
 
-            getLogger().info("All integrations initialized successfully!");
+            if (getConfig().getBoolean("settings.debug", false)) {
+                getLogger().info("All integrations initialized successfully!");
+            }
 
         } catch (Exception e) {
             getLogger().severe("Failed to initialize plugin: " + e.getMessage());
@@ -65,10 +77,14 @@ public class BluemapCMIPlugin extends JavaPlugin {
         // Register BlueMapAPI consumer to initialize when API is available
         BlueMapAPI.onEnable(api -> {
             try {
-                getLogger().info("BlueMap API is now available, initializing integration...");
+                if (getConfig().getBoolean("settings.debug", false)) {
+                    getLogger().info("BlueMap API is now available, initializing integration...");
+                }
                 this.bluemapIntegration = new BluemapIntegration(this);
                 bluemapIntegration.initializeMarkers();
-                getLogger().info("BlueMap integration initialized successfully!");
+                if (getConfig().getBoolean("settings.debug", false)) {
+                    getLogger().info("BlueMap integration initialized successfully!");
+                }
             } catch (Exception e) {
                 getLogger().severe("Failed to initialize BlueMap integration: " + e.getMessage());
                 e.printStackTrace();
@@ -77,8 +93,32 @@ public class BluemapCMIPlugin extends JavaPlugin {
 
         // Also register for disable event
         BlueMapAPI.onDisable(api -> {
-            getLogger().info("BlueMap API disabled");
+            if (getConfig().getBoolean("settings.debug", false)) {
+                getLogger().info("BlueMap API disabled");
+            }
         });
+    }
+
+    private void registerCustomAliases(CommandHandler commandHandler) {
+        java.util.List<String> aliases = getConfig().getStringList("aliases");
+        if (aliases == null || aliases.isEmpty()) {
+            return;
+        }
+
+        for (String alias : aliases) {
+            try {
+                org.bukkit.command.PluginCommand cmd = getCommand(alias);
+                if (cmd != null) {
+                    cmd.setExecutor(commandHandler);
+                    cmd.setTabCompleter(commandHandler);
+                    if (getConfig().getBoolean("settings.debug", false)) {
+                        getLogger().info("Registered custom alias: /" + alias);
+                    }
+                }
+            } catch (Exception e) {
+                getLogger().warning("Failed to register alias '" + alias + "': " + e.getMessage());
+            }
+        }
     }
 
     @Override

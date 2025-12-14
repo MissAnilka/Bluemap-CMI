@@ -38,5 +38,10 @@ world-blacklist:
 # General settings
 settings:
   update-interval: 300  # Seconds between updates (0 to disable auto-updates)
-  debug: false
-  log-marker-additions: false  # Set to true to see marker additions in console
+  debug: false  # Enable debug logging for all plugin operations
+  
+# Command aliases (in addition to /bluemapcmi)
+# Add custom aliases here - they will work alongside the default /bcmi
+aliases:
+  - bcmi
+  - bmc

@@ -21,7 +21,9 @@ public class CMIIntegration {
             throw new Exception("CMI plugin is not available");
         }
 
-        plugin.getLogger().info("CMIIntegration initialized successfully");
+        if (plugin.getConfig().getBoolean("settings.debug", false)) {
+            plugin.getLogger().info("CMIIntegration initialized successfully");
+        }
     }
 
     /**
@@ -99,6 +101,9 @@ public class CMIIntegration {
                                 }
                             }
                         }
+                    }
+                    if (plugin.getConfig().getBoolean("settings.debug", false)) {
+                        plugin.getLogger().info("Retrieved " + warps.size() + " warps from CMI");
                     }
                 }
             }

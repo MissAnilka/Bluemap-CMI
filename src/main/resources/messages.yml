@@ -1,0 +1,23 @@
+# BluemapCMI Messages Configuration
+# Use & for color codes (e.g., &a for green, &c for red, &e for yellow, etc.)
+
+# Permission denied message
+no-permission: "&cYou don't have permission to use this command!"
+
+# Reload command messages
+reload-success: "&aConfiguration reloaded successfully!"
+reload-error: "&cError reloading configuration: {error}"
+
+# Toggle command messages
+toggle-enabled: "&a{marker} markers enabled!"
+toggle-disabled: "&c{marker} markers disabled!"
+toggle-usage: "&cUsage: /bluemapcmi toggle <spawn|firstspawn|warp>"
+toggle-invalid: "&cInvalid marker type! Use: spawn, firstspawn, or warp"
+
+# Help message
+help:
+  - "&6&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  - "&6&lBluemapCMI Commands"
+  - "&e/bluemapcmi reload &7- Reload configuration"
+  - "&e/bluemapcmi toggle <spawn|firstspawn|warp> &7- Toggle marker visibility"
+  - "&6&l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

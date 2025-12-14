@@ -30,7 +30,9 @@ public class BluemapIntegration {
         
         this.bluemapAPI = BlueMapAPI.getInstance().get();
 
-        plugin.getLogger().info("BluemapIntegration initialized successfully");
+        if (plugin.getConfig().getBoolean("settings.debug", false)) {
+            plugin.getLogger().info("BluemapIntegration initialized successfully");
+        }
     }
 
     public void initializeMarkers() {
@@ -81,7 +83,9 @@ public class BluemapIntegration {
                 map.getMarkerSets().put("cmi-warps", warpsMarkerSet);
                 map.getMarkerSets().put("cmi-spawn", spawnMarkerSet);
                 map.getMarkerSets().put("cmi-firstspawn", firstSpawnMarkerSet);
-                plugin.getLogger().info("Markers initialized for map: " + map.getName());
+                if (plugin.getConfig().getBoolean("settings.debug", false)) {
+                    plugin.getLogger().info("Markers initialized for map: " + map.getName());
+                }
             }
         } catch (Exception e) {
             plugin.getLogger().warning("Error initializing markers: " + e.getMessage());
@@ -113,6 +117,9 @@ public class BluemapIntegration {
                 plugin.getConfig().getString("spawn-marker.description", "Server spawn location"),
                 "spawn"
             );
+            if (plugin.getConfig().getBoolean("settings.debug", false)) {
+                plugin.getLogger().info("Spawn marker added at " + formatLocation(spawnLocation));
+            }
         }
     }
 
@@ -140,6 +147,9 @@ public class BluemapIntegration {
                 plugin.getConfig().getString("first-spawn-marker.description", "First spawn location for new players"),
                 "firstspawn"
             );
+            if (plugin.getConfig().getBoolean("settings.debug", false)) {
+                plugin.getLogger().info("First Spawn marker added at " + formatLocation(firstSpawnLocation));
+            }
         }
     }
 
@@ -179,6 +189,10 @@ public class BluemapIntegration {
                 );
                 count++;
             }
+        }
+
+        if (plugin.getConfig().getBoolean("settings.debug", false)) {
+            plugin.getLogger().info("Retrieved " + count + " warp markers" + (skipped > 0 ? " (" + skipped + " skipped from blacklisted worlds)" : ""));
         }
     }
 

@@ -1,5 +1,5 @@
 name: BluemapCMI
-version: 1.0
+version: 1.1
 main: com.bluemapcmi.BluemapCMIPlugin
 description: Integration between Bluemap and CMI plugin
 authors:
@@ -8,3 +8,14 @@ depend:
   - CMI
 softdepend:
   - BlueMap
+
+commands:
+  bluemapcmi:
+    description: BluemapCMI main command
+    usage: /bluemapcmi <reload|toggle|help>
+    aliases: [bcmi, bmc]
+
+permissions:
+  bluemap.admin:
+    description: Access to all BluemapCMI commands
+    default: op
